@@ -9,19 +9,18 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 contract MerkleAirdrop{
     bytes32 immutable merkleRoot;
     address immutable tokenAddress;
-    address immutable baycAddress;
+    address immutable baycAddress = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
     address owner;
     uint256 totalTokensClaimed;
 
 
-    constructor(address _tokenAddress, bytes32 _merkleRoot, address _baycAddress){
+    constructor(address _tokenAddress, bytes32 _merkleRoot){
         require(_tokenAddress != address(0),"invalid address");
         require(_merkleRoot != bytes32(0),"invalid merkle root");
 
         tokenAddress = _tokenAddress;
         merkleRoot = _merkleRoot;
         owner = msg.sender;
-        baycAddress = _baycAddress;
     }
 
     mapping(address => bool) isClaimed;
@@ -47,4 +46,4 @@ contract MerkleAirdrop{
 }
 
 
-//Merkle Root: 0x580adec352f214cfe3b3512b0c7d41b24d4aa951f1af1ecc0ae0dc1faefe8b0b
+//Merkle Root:0x864f709297936d3a5f6e24908eb9ef37bdadfec10d455ebb2a3ead3260c9064f
