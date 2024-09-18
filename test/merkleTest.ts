@@ -89,7 +89,7 @@ describe("Airdrop", function(){
         expect(await token.balanceOf(addr1.address)).to.be.revertedWith("User does not hold any nft");
     });
 
-       it("should allow an eligible user with BAYC NFT to claim tokens", async() => {
+       it("should allow an eligible user with BAYC NFT has already claimed tokens", async() => {
       await helpers.impersonateAccount(nftHolder);
       await helpers.setBalance(nftHolder, ethers.parseEther("100"));
 
