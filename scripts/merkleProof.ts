@@ -8,7 +8,7 @@ interface AddressData {
 }
 
 //reading from the airdrop csv file
-
+//Merkle Root: 0x580adec352f214cfe3b3512b0c7d41b24d4aa951f1af1ecc0ae0dc1faefe8b0b
 async function readFromCsv():Promise<AddressData[]>{
     return new Promise((resolve, reject) =>{
         fs.readFile('airdrop.csv', 'utf8', (err, data) =>{
