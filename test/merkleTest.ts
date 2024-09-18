@@ -51,8 +51,6 @@ describe("Airdrop", function(){
   }
 
   describe("Nft holder should claim", function(){
-
-
     it("should allow an eligible user with BAYC NFT to claim tokens", async() => {
       await helpers.impersonateAccount(nftHolder);
       await helpers.setBalance(nftHolder, ethers.parseEther("100"));
@@ -64,7 +62,7 @@ describe("Airdrop", function(){
       const leaf = [impersonatedNftHolder.address, amount];
       const proof =  merkleTree.getProof(leaf);
 
-      await token.transfer(merkleAirdropDeployed, amount); // Fund the airdrop contract
+      await token.transfer(merkleAirdropDeployed, amount); 
 
         await expect(merkleAirdropDeployed.connect(impersonatedNftHolder).claim(amount, proof))
             .to.emit(token, "Transfer")
@@ -72,8 +70,20 @@ describe("Airdrop", function(){
 
         // Check if the user has claimed
         expect(await token.balanceOf(impersonatedNftHolder.address)).to.equal(amount);
+    });
 
-    
+    it("should not allow ineligible user to claim BAYC NFT", async() =>{
+       const {merkleAirdropDeployed, token, merkleTree} = await loadFixture(deployMerkleAirdrop);
+       const[owner, addr1] = await ethers.getSigners();
+
+      const amount =  ethers.parseUnits("50", 18);
+      const leaf = [addr1.address, amount];
+      const proof =  merkleTree.getProof(leaf);
+
+      await token.transfer(merkleAirdropDeployed, amount); 
+
+        // Check if the user has claimed
+        expect(await token.balanceOf(addr1.address)).to.be.revertedWith("User does not hold any nft");
     });
   });
 });
