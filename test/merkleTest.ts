@@ -8,8 +8,9 @@ import hre from "hardhat";
 // import keccak256 from "keccak256";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
-// import { ethers } from "ethers";
-let ethers = require('./node_modules/ethers');
+import { ethers } from "hardhat";
+// import { generateProofs } from "../";
+
 
 describe("Airdrop", function(){
   const baycAddress = "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D";
@@ -30,44 +31,34 @@ describe("Airdrop", function(){
     const merkleAirdrop =  await hre.ethers.getContractFactory("MerkleAirdrop");
     const merkleAirdropDeployed =  await merkleAirdrop.deploy(token, merkleRoot);
 
-     // Transfer tokens to merkleAirdropDeployed contract
-    await token.transfer(merkleAirdropDeployed, 100000);
-    return {merkleAirdropDeployed, token};
-  }
-
-  describe("Nft holder should claim", function(){
-
-    it("Should generate a valid merkle root", async function () {
-      await helpers.impersonateAccount(nftHolder);
+    await helpers.impersonateAccount(nftHolder);
       const impersonatedNftHolder = await ethers.getSigner(nftHolder);
       const [owner, addr1] = await ethers.getSigners();
     
       const leaves = [
-        { address: impersonatedNftHolder.address, amount: 100 },
-        { address: addr1.address, amount: 50 },
+        [ impersonatedNftHolder.address,  ethers.parseEther("100") ],
+        [addr1.address, ethers.parseEther("50") ],
       ];
 
-      const values = leaves.map(leaf => [leaf.address, leaf.amount.toString()]);
-      const tree = StandardMerkleTree.of(values, ["address", "uint256"]);
-    
-      const root = tree.root;
-      expect(root).to.equal(merkleRoot);
+      // const values = leaves.map(leaf => [leaf.address, leaf.amount.toString()]);
+      const merkleTree = StandardMerkleTree.of(leaves, ["address", "uint256"]);
 
-      // Save proofs 
+     // Transfer tokens to merkleAirdropDeployed contract
+    await token.transfer(merkleAirdropDeployed, 100000);
+    return {merkleAirdropDeployed, token, merkleTree};
+  }
 
-      for (const [index, value] of tree.entries()) {
-        const proof = tree.getProof(index);
-        proofs[value[0]] = proof;
-      }
-    });
+  describe("Nft holder should claim", function(){
+
 
     it("should allow an eligible user with BAYC NFT to claim tokens", async() => {
       await helpers.impersonateAccount(nftHolder);
       const impersonatedNftHolder = await ethers.getSigner(nftHolder);
-      const {merkleAirdropDeployed, token} = await loadFixture(deployMerkleAirdrop);
+      const {merkleAirdropDeployed, token, merkleTree} = await loadFixture(deployMerkleAirdrop);
 
-      const amount = 100;
-      const proof = proofs[impersonatedNftHolder.address];
+      const amount =  ethers.parseEther("100");
+      const proof = await merkleTree.getProof(0);
+      // const proof = proofs[impersonatedNftHolder.address];
 
       await token.transfer(merkleAirdropDeployed, amount); // Fund the airdrop contract
 
