@@ -32,7 +32,9 @@ describe("Airdrop", function(){
     const merkleAirdropDeployed =  await merkleAirdrop.deploy(token, merkleRoot);
 
     await helpers.impersonateAccount(nftHolder);
-      const impersonatedNftHolder = await ethers.getSigner(nftHolder);
+    
+
+    const impersonatedNftHolder = await ethers.getSigner(nftHolder);
       const [owner, addr1] = await ethers.getSigners();
     
       const leaves = [
@@ -53,12 +55,13 @@ describe("Airdrop", function(){
 
     it("should allow an eligible user with BAYC NFT to claim tokens", async() => {
       await helpers.impersonateAccount(nftHolder);
+      await helpers.setBalance(nftHolder, ethers.parseEther("100"));
+
       const impersonatedNftHolder = await ethers.getSigner(nftHolder);
       const {merkleAirdropDeployed, token, merkleTree} = await loadFixture(deployMerkleAirdrop);
 
-      const amount =  ethers.parseEther("100");
-      const proof = await merkleTree.getProof(0);
-      // const proof = proofs[impersonatedNftHolder.address];
+      const amount =  ethers.parseEther("31");
+      const proof =  merkleTree.getProof(0);
 
       await token.transfer(merkleAirdropDeployed, amount); // Fund the airdrop contract
 
